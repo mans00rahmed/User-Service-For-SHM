@@ -35,16 +35,9 @@ The platform follows a **microservices-based architecture**, where each core fun
 ### Backend
 - Java / Spring Boot
 - RESTful APIs
-- Spring Cloud
-
-### DevOps & Cloud
-- Docker
-- Kubernetes (Planned)
-- CI/CD Pipeline (GitHub Actions / Jenkins)
-- Cloud Platforms (AWS / GCP)
 
 ### Database
-- MySQL / PostgreSQL
+- MySQL
 - Database-per-service pattern
 
 ---
@@ -67,8 +60,7 @@ smart-home-maintenance-platform/
 
 ## Installation & Setup
 ### Prerequisites
-- Java 17+
-- Docker & Docker Compose
+- Java 17
 - Maven
 - Git
 
@@ -107,4 +99,4 @@ docker-compose up
 ---
 
 ## License
-Developed for academic purposes.
+Developed for TUS academic purposes.
