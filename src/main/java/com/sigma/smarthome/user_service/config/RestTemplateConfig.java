@@ -1,4 +1,4 @@
-package com.sigma.smarthome.maintenance_service.Config;
+package com.sigma.smarthome.user_service.config;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
