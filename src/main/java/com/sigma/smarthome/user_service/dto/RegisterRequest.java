@@ -1,7 +1,10 @@
 package com.sigma.smarthome.user_service.dto;
 
+import com.sigma.smarthome.user_service.enums.UserRole;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
@@ -14,12 +17,16 @@ public class RegisterRequest {
 	@Size(min = 8, message = "Password must be at least 8 characters")
 	private String password;
 	
+	@NotNull(message = "Role is required")
+	private UserRole role;
+	
 	public RegisterRequest() {}
 	
 	
-	public RegisterRequest(String email, String password) {
+	public RegisterRequest(String email, String password, UserRole role) {
 		this.email = email;
 		this.password = password;
+		this.role = role;
 	}
 
 
@@ -40,6 +47,16 @@ public class RegisterRequest {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+
+	public UserRole getRole() {
+		return role;
+	}
+
+
+	public void setRole(UserRole role) {
+		this.role = role;
 	}
 	
 }

@@ -1,22 +1,24 @@
 package com.sigma.smarthome.user_service.dto;
 
+import java.util.UUID;
+
 public class RegisterResponse {
 	
-	private Long id;
+	private UUID id;
 	private String email;
 	
 	public RegisterResponse() {}
 	
-	public RegisterResponse(Long id, String email) {
+	public RegisterResponse(UUID id, String email) {
 		this.id = id;
 		this.email = email;
 	}
 
-	public Long getId() {
+	public UUID getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 

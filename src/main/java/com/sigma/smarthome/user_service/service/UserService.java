@@ -20,13 +20,16 @@ public class UserService {
     }
 
     public RegisterResponse register(RegisterRequest request) {
+    	
+    	String email = request.getEmail().trim().toLowerCase();
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
 
         User user = new User();
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
+        user.setRole(request.getRole());
         user.setPassword(passwordEncoder.encode(request.getPassword())); // ✅ hash
 
         User saved = userRepository.save(user);
