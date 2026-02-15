@@ -28,7 +28,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
             .csrf(csrf -> csrf.ignoringRequestMatchers(H2_MATCHER))
             .headers(headers -> headers.frameOptions(frame -> frame.disable()));
-
         return http.build();
     }
 
@@ -39,12 +38,16 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/h2-console", "/h2-console/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/h2-console", "/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            // IMPORTANT: Missing/invalid JWT must return 401 (not 403)
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(
+                (req, res, e) -> res.sendError(401)
+            ));
 
         return http.build();
     }
