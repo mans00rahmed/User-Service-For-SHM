@@ -17,6 +17,8 @@ public class GlobalExceptionHandler {
 		
 	}
 	
+	
+	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	public ResponseEntity<String> handleValidationErrors(MethodArgumentNotValidException ex){
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");
@@ -28,7 +30,10 @@ public class GlobalExceptionHandler {
 	            "error", "UNAUTHORIZED",
 	            "message", ex.getMessage()
 	    ));
+	    
 	}
+
+
 
 
 }
