@@ -1,5 +1,7 @@
 package com.sigma.smarthome.user_service.exception;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,5 +22,13 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");
 		
 	}
+	@ExceptionHandler(InvalidCredentialsException.class)
+	public ResponseEntity<?> handleInvalidCredentials(InvalidCredentialsException ex) {
+	    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+	            "error", "UNAUTHORIZED",
+	            "message", ex.getMessage()
+	    ));
+	}
+
 
 }
