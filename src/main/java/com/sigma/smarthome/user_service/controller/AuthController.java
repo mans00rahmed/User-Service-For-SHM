@@ -38,7 +38,13 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
 
-        User user = userService.getByEmail(request.getEmail());
+        User user;
+        try {
+            user = userService.getByEmail(request.getEmail());
+        } catch (RuntimeException ex) {
+            // email not found -> 401 (matches acceptance criteria)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
         boolean ok = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!ok) {
@@ -48,8 +54,4 @@ public class AuthController {
         String token = jwtService.generateToken(user.getId().toString(), user.getRole());
         return ResponseEntity.ok(new LoginResponse(token));
     }
-    
-    
-
-
 }
