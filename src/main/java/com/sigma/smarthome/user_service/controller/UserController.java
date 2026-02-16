@@ -7,25 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class UserController {
 
-    private final RestTemplate restTemplate;
     private final UserService userService;
 
-    public UserController(RestTemplate restTemplate, UserService userService) {
-        this.restTemplate = restTemplate;
+    public UserController(UserService userService) {
         this.userService = userService;
-    }
-
-    @GetMapping("/users/property-test")
-    public String callPropertyService() {
-        return restTemplate.getForObject(
-                "http://property-service/properties/test",
-                String.class
-        );
     }
 
     @GetMapping("/users/test")
@@ -38,12 +27,10 @@ public class UserController {
         String userId = authentication.getName(); // JWT subject (sub)
         User user = userService.getById(userId);
 
-        return ResponseEntity.ok(
-                new UserResponse(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getRole()
-                )
-        );
+        return ResponseEntity.ok(new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getRole()
+        ));
     }
 }

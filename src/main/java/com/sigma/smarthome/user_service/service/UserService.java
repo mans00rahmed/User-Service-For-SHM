@@ -28,6 +28,12 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
     }
 
+    public User getByEmail(String email) {
+        String normalised = email.trim().toLowerCase();
+        return userRepository.findByEmail(normalised)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + normalised));
+    }
+
     public RegisterResponse register(RegisterRequest request) {
 
         String email = request.getEmail().trim().toLowerCase();
@@ -36,14 +42,15 @@ public class UserService {
             throw new EmailAlreadyExistsException("Email already exists");
         }
 
+        // ✅ default role if not provided
         UserRole role = (request.getRole() != null)
                 ? request.getRole()
                 : UserRole.MAINTENANCE_STAFF;
 
         User user = new User();
         user.setEmail(email);
-        user.setRole(role);
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // hash
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // ✅ hashed
+        user.setRole(role); // ✅ never null
 
         User saved = userRepository.save(user);
 
