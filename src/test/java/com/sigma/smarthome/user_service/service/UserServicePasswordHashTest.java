@@ -2,6 +2,7 @@ package com.sigma.smarthome.user_service.service;
 
 import com.sigma.smarthome.user_service.dto.RegisterRequest;
 import com.sigma.smarthome.user_service.entity.User;
+import com.sigma.smarthome.user_service.enums.UserRole;
 import com.sigma.smarthome.user_service.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,10 @@ class UserServicePasswordHashTest {
         String plainPassword = "Password123!";
 
         RegisterRequest req = new RegisterRequest();
+        
         req.setEmail(email);
         req.setPassword(plainPassword);
+        req.setRole(UserRole.PROPERTY_MANAGER);
 
         userService.register(req);
 
