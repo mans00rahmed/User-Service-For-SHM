@@ -3,6 +3,7 @@ package com.sigma.smarthome.user_service.dto;
 public class LoginResponse {
 
     private String accessToken;
+    private String tokenType = "Bearer";
 
     public LoginResponse() {}
 
@@ -16,5 +17,13 @@ public class LoginResponse {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public void setTokenType(String tokenType) {
+        this.tokenType = tokenType;
     }
 }

@@ -21,11 +21,16 @@ spring:
       enabled: true
       path: /h2-console
 
+  # Disable default Spring Security login
+  security:
+    user:
+      name: disabled
+      password: disabled
+
 app:
   jwt:
-    secret: "THIS_IS_A_DEMO_SECRET_CHANGE_THIS_TO_A_LONG_RANDOM_SECRET_32_CHAR_MINIMUM"
+    secret: "CHANGE_THIS_TO_A_LONG_SECURE_RANDOM_SECRET_32CHARS_MINIMUM"
     expirySeconds: 3600
-
 
 eureka:
   client:

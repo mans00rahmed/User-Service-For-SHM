@@ -42,23 +42,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Claims claims = jwtService.parseClaims(token);
 
             String userId = claims.getSubject();
-            String role = claims.get("role", String.class);
+            String role = String.valueOf(claims.get("role"));
 
-            // Convert to Spring authority: ROLE_PROPERTY_MANAGER etc
-            List<SimpleGrantedAuthority> authorities =
-                    List.of(new SimpleGrantedAuthority("ROLE_" + role));
-
-            var auth = new UsernamePasswordAuthenticationToken(
-                    userId, null, authorities
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(auth);
+            var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            var authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception ex) {
-            // Invalid token -> clear context and let Security handle 401
+            // Invalid token -> clear context; Security will return 401
             SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return path.startsWith("/auth/")
+                || path.startsWith("/h2-console")
+                || path.startsWith("/actuator");
     }
 }

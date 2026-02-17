@@ -44,6 +44,7 @@ class UserServicePasswordHashTest {
         String plainPassword = "Password123!";
 
         RegisterRequest req = new RegisterRequest();
+        
         req.setEmail(email);
         req.setPassword(plainPassword);
         req.setRole(UserRole.PROPERTY_MANAGER);

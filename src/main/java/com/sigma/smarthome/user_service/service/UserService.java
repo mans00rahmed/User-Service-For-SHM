@@ -42,15 +42,15 @@ public class UserService {
             throw new EmailAlreadyExistsException("Email already exists");
         }
 
-        // ✅ default role if not provided
+        // default role if not provided
         UserRole role = (request.getRole() != null)
                 ? request.getRole()
                 : UserRole.MAINTENANCE_STAFF;
 
         User user = new User();
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // ✅ hashed
-        user.setRole(role); // ✅ never null
+        user.setPassword(passwordEncoder.encode(request.getPassword())); // hashed
+        user.setRole(role); // never null
 
         User saved = userRepository.save(user);
 
