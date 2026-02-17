@@ -21,20 +21,17 @@ spring:
       enabled: true
       path: /h2-console
 
-  # Disable default login page
+  # Disable default Spring Security login
   security:
     user:
       name: disabled
       password: disabled
 
-eureka:
-  client:
-    enabled: false
-
-# =====================
-# JWT CONFIG
-# =====================
 app:
   jwt:
     secret: "CHANGE_THIS_TO_A_LONG_SECURE_RANDOM_SECRET_32CHARS_MINIMUM"
-    expiry-seconds: 3600
+    expirySeconds: 3600
+
+eureka:
+  client:
+    enabled: false

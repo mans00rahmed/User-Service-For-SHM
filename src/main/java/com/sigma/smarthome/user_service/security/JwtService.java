@@ -1,6 +1,7 @@
 package com.sigma.smarthome.user_service.security;
 
 import com.sigma.smarthome.user_service.entity.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -20,9 +21,8 @@ public class JwtService {
 
     public JwtService(
             @Value("${app.jwt.secret}") String secret,
-            @Value("${app.jwt.expiry-seconds:3600}") long expirySeconds
+            @Value("${app.jwt.expirySeconds}") long expirySeconds
     ) {
-        // IMPORTANT: secret must be long enough for HS256
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirySeconds = expirySeconds;
     }
@@ -41,7 +41,7 @@ public class JwtService {
                 .compact();
     }
 
-    public io.jsonwebtoken.Claims parseClaims(String token) {
+    public Claims parseClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

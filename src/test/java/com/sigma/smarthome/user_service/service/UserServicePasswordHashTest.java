@@ -14,14 +14,28 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class UserServicePasswordHashTest {
 
-    @Autowired
-    private UserService userService;
+    @Autowired private UserService userService;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private UserRepository userRepository;
+    
+    
+    @Test
+    void registerUser_withoutRole_assignsDefaultRole() {
+        String email = "taha_role_" + System.currentTimeMillis() + "@test.com";
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+        RegisterRequest req = new RegisterRequest();
+        req.setEmail(email);
+        req.setPassword("Password123!");
+        // role intentionally not set
+
+        userService.register(req);
+
+        User saved = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AssertionError("User not saved"));
+
+        assertEquals(UserRole.MAINTENANCE_STAFF, saved.getRole());
+    }
 
     @Test
     void registerUser_savesHashedPassword_notPlainText() {

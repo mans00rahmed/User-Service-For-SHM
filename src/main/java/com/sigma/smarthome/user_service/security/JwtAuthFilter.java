@@ -25,32 +25,37 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (auth != null && auth.startsWith("Bearer ")) {
-            String token = auth.substring(7);
-            try {
-                Claims claims = jwtService.parseClaims(token);
+        if (header == null || !header.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-                String userId = claims.getSubject();
-                String role = String.valueOf(claims.get("role"));
+        String token = header.substring(7);
 
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
-                var authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+        try {
+            Claims claims = jwtService.parseClaims(token);
 
-            } catch (Exception ex) {
-                // Invalid token -> clear context; Security will return 401
-                SecurityContextHolder.clearContext();
-            }
+            String userId = claims.getSubject();
+            String role = String.valueOf(claims.get("role"));
+
+            var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            var authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        } catch (Exception ex) {
+            // Invalid token -> clear context; Security will return 401
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
     }
-    
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
@@ -58,5 +63,4 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 || path.startsWith("/h2-console")
                 || path.startsWith("/actuator");
     }
-
 }
