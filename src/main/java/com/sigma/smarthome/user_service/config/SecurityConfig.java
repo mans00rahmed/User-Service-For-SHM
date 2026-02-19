@@ -1,9 +1,9 @@
 package com.sigma.smarthome.user_service.config;
 
 import com.sigma.smarthome.user_service.security.JwtAuthFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,28 +20,37 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(1)
-    SecurityFilterChain appSecurityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .formLogin(form -> form.disable())
+            .httpBasic(basic -> basic.disable())
+
+            // IMPORTANT: leave anonymous ENABLED
+            // This allows Spring to correctly decide between 401 vs 403
+            // (401 = not authenticated, 403 = authenticated but forbidden)
+
             .authorizeHttpRequests(auth -> auth
-                // public endpoints
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/h2-console", "/h2-console/**").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
 
-                .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
-
-                .requestMatchers("/users/test", "/users/property-test").permitAll()
+                // property feature restricted to property manager
+                .requestMatchers(HttpMethod.POST, "/property/**").hasRole("PROPERTY_MANAGER")
 
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            // Missing/invalid JWT must return 401 (not 403)
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(
-                (req, res, e) -> res.sendError(401)
-            ));
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) ->
+                    res.sendError(HttpServletResponse.SC_UNAUTHORIZED) // 401
+                )
+                .accessDeniedHandler((req, res, e) ->
+                    res.sendError(HttpServletResponse.SC_FORBIDDEN) // 403
+                )
+            );
 
         return http.build();
     }
