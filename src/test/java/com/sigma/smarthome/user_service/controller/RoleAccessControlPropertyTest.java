@@ -1,10 +1,10 @@
 package com.sigma.smarthome.user_service.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sigma.smarthome.user_service.dto.LoginRequest;
 import com.sigma.smarthome.user_service.dto.RegisterRequest;
 import com.sigma.smarthome.user_service.enums.UserRole;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,58 +12,62 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserControllerSecurityTest {
+class RoleAccessControlPropertyTest {
 
     @Autowired MockMvc mockMvc;
     @Autowired ObjectMapper objectMapper;
 
-    @Test
-    void protectedEndpoint_returns401_whenNoToken() throws Exception {
-        mockMvc.perform(get("/me"))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    void protectedEndpoint_returns200_whenValidToken() throws Exception {
-        // register
+    private String registerAndLogin(String email, String password, UserRole role) throws Exception {
         RegisterRequest reg = new RegisterRequest();
-        reg.setEmail("secure@example.com");
-        reg.setPassword("Password123!");
-        reg.setRole(UserRole.PROPERTY_MANAGER);
+        reg.setEmail(email);
+        reg.setPassword(password);
+        reg.setRole(role);
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reg)))
                 .andExpect(status().isCreated());
 
-        // login -> get token
         LoginRequest login = new LoginRequest();
-        login.setEmail("secure@example.com");
-        login.setPassword("Password123!");
+        login.setEmail(email);
+        login.setPassword(password);
 
-        var loginResJson = mockMvc.perform(post("/auth/login")
+        String body = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                .andReturn().getResponse().getContentAsString();
 
-        String token = objectMapper.readTree(loginResJson)
-                .get("accessToken")
-                .asText();
+        JsonNode json = objectMapper.readTree(body);
+        return json.get("token").asText();
+    }
 
-        Assertions.assertFalse(token.isBlank());
+    @Test
+    void propertyFeature_returns401_whenNoToken() throws Exception {
+        mockMvc.perform(post("/property/feature"))
+                .andExpect(status().isUnauthorized());
+    }
 
-        // call /me with Authorization header
-        mockMvc.perform(get("/me")
+    @Test
+    void propertyFeature_returns201_whenPropertyManagerToken() throws Exception {
+        String token = registerAndLogin("pm@example.com", "Password123!", UserRole.PROPERTY_MANAGER);
+
+        mockMvc.perform(post("/property/feature")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void propertyFeature_returns403_whenMaintenanceStaffToken() throws Exception {
+        String token = registerAndLogin("ms@example.com", "Password123!", UserRole.MAINTENANCE_STAFF);
+
+        mockMvc.perform(post("/property/feature")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
     }
 }
