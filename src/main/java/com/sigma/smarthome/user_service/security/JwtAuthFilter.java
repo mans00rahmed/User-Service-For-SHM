@@ -29,14 +29,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
+    	System.out.println("JwtAuthFilter path=" + request.getServletPath());
+    	
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (header == null || !header.startsWith("Bearer ")) {
+        	System.out.println("No/invalid Authorization header");
             filterChain.doFilter(request, response);
             return;
         }
 
         String token = header.substring(7);
+        
+        System.out.println("JWT received lenght=" + token.length() + " dots=" + token.chars().filter(ch -> ch== '.').count());
 
         try {
             Claims claims = jwtService.parseClaims(token);
@@ -47,9 +52,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
             var authentication = new UsernamePasswordAuthenticationToken(userId, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            System.out.println("Auth set = " + authentication);
 
         } catch (Exception ex) {
             // Invalid token -> clear context; Security will return 401
+        	ex.printStackTrace();
             SecurityContextHolder.clearContext();
         }
 

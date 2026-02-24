@@ -31,17 +31,21 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/**").permitAll()
                 .requestMatchers("/h2-console", "/h2-console/**").permitAll()
 
+                // explicit auth endpoints
                 .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
 
-                .requestMatchers("/users/test", "/users/property-test").permitAll()
+                // role-restricted features (SMPM-44)
+                .requestMatchers("/property/**").hasRole("PROPERTY_MANAGER")
 
+                // everything else must be authenticated
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             // Missing/invalid JWT must return 401 (not 403)
-            .exceptionHandling(ex -> ex.authenticationEntryPoint(
-                (req, res, e) -> res.sendError(401)
-            ));
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) -> res.sendError(401))
+                .accessDeniedHandler((req, res, e) -> res.sendError(403))
+            );
 
         return http.build();
     }

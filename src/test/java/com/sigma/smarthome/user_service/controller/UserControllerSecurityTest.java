@@ -47,7 +47,7 @@ class UserControllerSecurityTest {
         login.setEmail("secure@example.com");
         login.setPassword("Password123!");
 
-        var loginRes = mockMvc.perform(post("/auth/login")
+        var loginResJson = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -55,12 +55,15 @@ class UserControllerSecurityTest {
                 .getResponse()
                 .getContentAsString();
 
-        // crude extract (works for simple {"token":"..."} )
-        String token = loginRes.split(":")[1].replace("\"", "").replace("}", "").trim();
+        String token = objectMapper.readTree(loginResJson)
+                .get("accessToken")
+                .asText();
+
         Assertions.assertFalse(token.isBlank());
 
         // call /me with Authorization header
-        mockMvc.perform(get("/me").header("Authorization", "Bearer " + token))
+        mockMvc.perform(get("/me")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
 }
