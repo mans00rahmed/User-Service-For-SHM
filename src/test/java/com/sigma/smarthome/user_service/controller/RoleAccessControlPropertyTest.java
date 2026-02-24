@@ -41,10 +41,21 @@ class RoleAccessControlPropertyTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
         JsonNode json = objectMapper.readTree(body);
-        return json.get("token").asText();
+
+        // Current API returns: {"accessToken":"...","tokenType":"Bearer"}
+        JsonNode tokenNode = json.get("accessToken");
+        if (tokenNode == null) tokenNode = json.get("token"); // fallback if contract changes
+
+        if (tokenNode == null || tokenNode.asText().isBlank()) {
+            throw new AssertionError("Login response missing accessToken/token. Body=" + body);
+        }
+
+        return tokenNode.asText();
     }
 
     @Test
@@ -55,7 +66,8 @@ class RoleAccessControlPropertyTest {
 
     @Test
     void propertyFeature_returns201_whenPropertyManagerToken() throws Exception {
-        String token = registerAndLogin("pm@example.com", "Password123!", UserRole.PROPERTY_MANAGER);
+        String email = "pm_" + System.nanoTime() + "@example.com";
+        String token = registerAndLogin(email, "Password123!", UserRole.PROPERTY_MANAGER);
 
         mockMvc.perform(post("/property/feature")
                         .header("Authorization", "Bearer " + token))
@@ -64,7 +76,8 @@ class RoleAccessControlPropertyTest {
 
     @Test
     void propertyFeature_returns403_whenMaintenanceStaffToken() throws Exception {
-        String token = registerAndLogin("ms@example.com", "Password123!", UserRole.MAINTENANCE_STAFF);
+        String email = "ms_" + System.nanoTime() + "@example.com";
+        String token = registerAndLogin(email, "Password123!", UserRole.MAINTENANCE_STAFF);
 
         mockMvc.perform(post("/property/feature")
                         .header("Authorization", "Bearer " + token))
