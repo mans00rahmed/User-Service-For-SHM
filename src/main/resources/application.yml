@@ -29,7 +29,7 @@ spring:
 
 app:
   jwt:
-    secret: "CHANGE_THIS_TO_A_LONG_SECURE_RANDOM_SECRET_32CHARS_MINIMUM"
+    secret: "my-super-secure-jwt-secret-key-2026-smart-home-platform"
     expirySeconds: 3600
 
 eureka:
