@@ -143,10 +143,6 @@
           </execution>
         </executions>
       </plugin>
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/master
     </plugins>
   </build>
 
