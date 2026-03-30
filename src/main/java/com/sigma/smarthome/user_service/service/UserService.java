@@ -41,6 +41,10 @@ public class UserService {
         if (userRepository.existsByEmail(email)) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
+    	if (request.getRole() == null) {
+    	    throw new IllegalArgumentException("Role is required");
+    	}
+
 
         // default role if not provided
         UserRole role = (request.getRole() != null)
