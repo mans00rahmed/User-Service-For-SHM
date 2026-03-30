@@ -1,6 +1,7 @@
 package com.sigma.smarthome.user_service.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sigma.smarthome.user_service.dto.LoginRequest;
 import com.sigma.smarthome.user_service.dto.RegisterRequest;
 import com.sigma.smarthome.user_service.enums.UserRole;
 import com.sigma.smarthome.user_service.repository.UserRepository;
@@ -106,4 +107,74 @@ class AuthControllerTest {
         Assertions.assertNotEquals(rawPassword, saved.getPassword());
         Assertions.assertTrue(BCrypt.checkpw(rawPassword, saved.getPassword()));
     }
+    
+    @Test
+    void login_returns200_andToken_whenValidCredentials() throws Exception {
+        // register first
+        RegisterRequest reg = new RegisterRequest();
+        reg.setEmail("login_ok@example.com");
+        reg.setPassword("Password123!");
+        reg.setRole(UserRole.PROPERTY_MANAGER);
+
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(reg)))
+            .andExpect(status().isCreated());
+
+        // login
+        LoginRequest login = new LoginRequest();
+        login.setEmail("login_ok@example.com");
+        login.setPassword("Password123!");
+
+        var result = mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(login)))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String body = result.getResponse().getContentAsString();
+
+        var node = objectMapper.readTree(body);
+        String accessToken = node.get("accessToken").asText();
+
+        Assertions.assertNotNull(accessToken);
+        Assertions.assertFalse(accessToken.isBlank(), "accessToken should not be blank");
+    }
+
+    @Test
+    void login_returns401_whenPasswordWrong() throws Exception {
+        // register first
+        RegisterRequest reg = new RegisterRequest();
+        reg.setEmail("login_badpass@example.com");
+        reg.setPassword("Password123!");
+        reg.setRole(UserRole.MAINTENANCE_STAFF);
+
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(reg)))
+            .andExpect(status().isCreated());
+
+        // login with wrong password
+        var login = new LoginRequest();
+        login.setEmail("login_badpass@example.com");
+        login.setPassword("WrongPassword!");
+
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(login)))
+            .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void login_returns401_whenEmailNotFound() throws Exception {
+        var login = new LoginRequest();
+        login.setEmail("missing@example.com");
+        login.setPassword("Password123!");
+
+        mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(login)))
+            .andExpect(status().isUnauthorized());
+    }
+
 }

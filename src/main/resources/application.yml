@@ -21,6 +21,17 @@ spring:
       enabled: true
       path: /h2-console
 
+  # Disable default Spring Security login
+  security:
+    user:
+      name: disabled
+      password: disabled
+
+app:
+  jwt:
+    secret: "my-super-secure-jwt-secret-key-2026-smart-home-platform"
+    expirySeconds: 3600
+
 eureka:
   client:
     enabled: false
