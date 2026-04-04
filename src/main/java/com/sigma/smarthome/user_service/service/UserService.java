@@ -21,6 +21,13 @@ public class UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
+    
+    public UserRole getRoleById(String userId) {
+        UUID id = UUID.fromString(userId);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+        return user.getRole();
+    }
 
     public User getById(String userId) {
         UUID id = UUID.fromString(userId);
