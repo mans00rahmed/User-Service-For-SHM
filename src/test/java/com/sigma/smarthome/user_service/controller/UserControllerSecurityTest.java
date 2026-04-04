@@ -25,15 +25,16 @@ class UserControllerSecurityTest {
 
     @Test
     void protectedEndpoint_returns401_whenNoToken() throws Exception {
-        mockMvc.perform(get("/me"))
+        mockMvc.perform(get("/api/v1/users/me"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void protectedEndpoint_returns200_whenValidToken() throws Exception {
-        // register
+        String email = "secure_" + System.nanoTime() + "@example.com";
+
         RegisterRequest reg = new RegisterRequest();
-        reg.setEmail("secure@example.com");
+        reg.setEmail(email);
         reg.setPassword("Password123!");
         reg.setRole(UserRole.PROPERTY_MANAGER);
 
@@ -42,12 +43,11 @@ class UserControllerSecurityTest {
                         .content(objectMapper.writeValueAsString(reg)))
                 .andExpect(status().isCreated());
 
-        // login -> get token
         LoginRequest login = new LoginRequest();
-        login.setEmail("secure@example.com");
+        login.setEmail(email);
         login.setPassword("Password123!");
 
-        var loginResJson = mockMvc.perform(post("/auth/login")
+        String loginResJson = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(login)))
                 .andExpect(status().isOk())
@@ -61,8 +61,7 @@ class UserControllerSecurityTest {
 
         Assertions.assertFalse(token.isBlank());
 
-        // call /me with Authorization header
-        mockMvc.perform(get("/me")
+        mockMvc.perform(get("/api/v1/users/me")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }

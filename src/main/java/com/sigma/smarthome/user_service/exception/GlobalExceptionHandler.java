@@ -11,24 +11,29 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-	@ExceptionHandler(EmailAlreadyExistsException.class)
-	public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException ex){
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<String> handleEmailExists(EmailAlreadyExistsException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 
-	}
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationErrors(MethodArgumentNotValidException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");
+    }
 
-	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<String> handleValidationErrors(MethodArgumentNotValidException ex){
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid input data");
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<?> handleInvalidCredentials(InvalidCredentialsException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                "error", "UNAUTHORIZED",
+                "message", ex.getMessage()
+        ));
+    }
 
-	}
-	@ExceptionHandler(InvalidCredentialsException.class)
-	public ResponseEntity<?> handleInvalidCredentials(InvalidCredentialsException ex) {
-		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
-				"error", "UNAUTHORIZED",
-				"message", ex.getMessage()
-				));
-
-	}
-
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "error", "NOT_FOUND",
+                "message", ex.getMessage()
+        ));
+    }
 }
