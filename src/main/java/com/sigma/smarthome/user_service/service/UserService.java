@@ -5,6 +5,7 @@ import com.sigma.smarthome.user_service.dto.RegisterResponse;
 import com.sigma.smarthome.user_service.entity.User;
 import com.sigma.smarthome.user_service.enums.UserRole;
 import com.sigma.smarthome.user_service.exception.EmailAlreadyExistsException;
+import com.sigma.smarthome.user_service.exception.ResourceNotFoundException;
 import com.sigma.smarthome.user_service.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,28 +22,27 @@ public class UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-    
+
     public UserRole getRoleById(String userId) {
         UUID id = UUID.fromString(userId);
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
         return user.getRole();
     }
 
     public User getById(String userId) {
         UUID id = UUID.fromString(userId);
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
     }
 
     public User getByEmail(String email) {
         String normalised = email.trim().toLowerCase();
         return userRepository.findByEmail(normalised)
-                .orElseThrow(() -> new IllegalArgumentException("User not found: " + normalised));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + normalised));
     }
 
     public RegisterResponse register(RegisterRequest request) {
-
         String email = request.getEmail().trim().toLowerCase();
 
         if (userRepository.existsByEmail(email)) {
@@ -53,15 +53,14 @@ public class UserService {
     	}
 
 
-        // default role if not provided
         UserRole role = (request.getRole() != null)
                 ? request.getRole()
                 : UserRole.MAINTENANCE_STAFF;
 
         User user = new User();
         user.setEmail(email);
-        user.setPassword(passwordEncoder.encode(request.getPassword())); // hashed
-        user.setRole(role); // never null
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRole(role);
 
         User saved = userRepository.save(user);
 
