@@ -32,6 +32,20 @@ app:
     secret: "my-super-secure-jwt-secret-key-2026-smart-home-platform"
     expirySeconds: 3600
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+
 eureka:
   client:
-    enabled: false
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true

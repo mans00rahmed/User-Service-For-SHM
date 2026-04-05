@@ -8,6 +8,6 @@ public class HealthController {
 
     @GetMapping("/")
     public String home() {
-        return "Maintenance Service is up and running 🚀";
+        return "User Service is up and running";
     }
 }
