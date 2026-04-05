@@ -32,6 +32,8 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.POST, "/auth/register", "/auth/login").permitAll()
 
+                .requestMatchers(HttpMethod.POST, "/property/feature").hasRole("PROPERTY_MANAGER")
+
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/*/role").hasRole("PROPERTY_MANAGER")
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
 

@@ -2,12 +2,16 @@ package com.sigma.smarthome.user_service.controller;
 
 import com.sigma.smarthome.user_service.dto.UserResponse;
 import com.sigma.smarthome.user_service.entity.User;
+import com.sigma.smarthome.user_service.enums.UserRole;
 import com.sigma.smarthome.user_service.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -32,5 +36,11 @@ public class UserController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/role")
+    public ResponseEntity<Map<String, String>> getUserRole(@PathVariable String id) {
+        UserRole role = userService.getRoleById(id);
+        return ResponseEntity.ok(Map.of("role", role.name()));
     }
 }
