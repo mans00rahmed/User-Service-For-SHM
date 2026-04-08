@@ -1,6 +1,7 @@
 package com.sigma.smarthome.user_service.service;
 
 import com.sigma.smarthome.user_service.dto.RegisterRequest;
+import com.sigma.smarthome.user_service.dto.RegisterResponse;
 import com.sigma.smarthome.user_service.entity.User;
 import com.sigma.smarthome.user_service.enums.UserRole;
 import com.sigma.smarthome.user_service.repository.UserRepository;
@@ -10,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class UserServicePasswordHashTest {
@@ -57,4 +60,5 @@ class UserServicePasswordHashTest {
         assertNotEquals(plainPassword, saved.getPassword(), "Password should be hashed, not plain text");
         assertTrue(passwordEncoder.matches(plainPassword, saved.getPassword()), "Hashed password should match original");
     }
+
 }
