@@ -34,7 +34,7 @@ public class SecurityConfig {
 
                 .requestMatchers(HttpMethod.POST, "/property/feature").hasRole("PROPERTY_MANAGER")
 
-                .requestMatchers(HttpMethod.GET, "/api/v1/users/*/role").hasRole("PROPERTY_MANAGER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/users/*/role").hasAnyRole("PROPERTY_MANAGER", "MAINTENANCE_STAFF")
                 .requestMatchers(HttpMethod.GET, "/api/v1/users/me").authenticated()
 
                 .anyRequest().authenticated()
